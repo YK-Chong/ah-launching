@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{{PRODUCT_NAME}}}</title>
+    <link rel="stylesheet" href="External/style.css" />
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas
+        id="unity-canvas"
+        width="{{{WIDTH}}}"
+        height="{{{HEIGHT}}}"
+      ></canvas>
+
+      <footer>
+        <div class="footer">
+          <a
+            href="https://jrpg.com/"
+            onclick="window.parent.location.href='https://jrpg.com/'"
+            >WebGL Tools for Unity</a
+          >
+        </div>
+      </footer>
+    </div>
+    <script>
+        let portraitMode;
+        try {
+          portraitMode = !!JSON.parse({{{PORTRAIT_MODE}}});
+        } catch (e) {
+          portraitMode = false;
+        }
+
+        var buildUrl = "Build";
+      var loaderUrl = buildUrl +  "/{{{ LOADER_FILENAME }}}";
+      var config = {
+          dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+          frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+          codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "{{{ COMPANY_NAME }}}",
+          productName: "{{{ PRODUCT_NAME }}}",
+          productVersion: "{{{ PRODUCT_VERSION }}}",
+      };
+
+        var container = document.querySelector("#unity-container");
+        var canvas = document.querySelector("#unity-canvas");
+
+        // By default Unity keeps WebGL canvas render target size matched with
+        // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+        // Set this to false if you want to decouple this synchronization from
+        // happening inside the engine, and you would instead like to size up
+        // the canvas DOM size and WebGL render target sizes yourself.
+        // config.matchWebGLToCanvasSize = false;
+        canvas.style.width = "{{{WIDTH}}}" + "px";
+        canvas.style.height = "{{{HEIGHT}}}" + "px";
+        var unityInstance = null;
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, UnityLoadProgress)
+            .then((uI) => {
+              unityInstance = uI;
+
+            })
+            .catch((message) => {
+              alert(message);
+            });
+        };
+
+        document.body.appendChild(script);
+
+        function OnUnload() {
+          unityInstance.SendMessage("_BrowserControls", "BrowserUnloaded");
+        }
+
+        function OnAppLoaded() {
+          document
+            .getElementById("unity-container")
+            .addEventListener("mouseenter", () => {
+              unityInstance.SendMessage("_BrowserControls", "MouseEntered");
+            });
+
+          document
+            .getElementById("unity-container")
+            .addEventListener("mouseleave", () => {
+              unityInstance.SendMessage("_BrowserControls", "MouseLeft");
+            });
+        }
+
+        function UnityLoadProgress(progress) {
+          if (progress == 1) {
+            //gameInstance.logo.style.display = gameInstance.progress.style.display = "none";
+            console.log("WEBGL LOADED SUCCESSFULLY..");
+
+            setTimeout(() => {
+              unityInstance.SendMessage("_BrowserControls", "BrowserLoaded");
+              Resize();
+              OnAppLoaded();
+            }, 2500);
+          }
+        }
+
+        function Resize() {
+          //Resizer functionality
+          //Itch IO Logic - not to be mistaken by main site logic
+          let container = unityInstance.Module.canvas;
+          let width = window.innerWidth;
+          let height = window.innerHeight;
+
+          let aspectRatio;
+
+          if (portraitMode) {
+            if ({{{HEIGHT}}} > {{{WIDTH}}}) {
+              aspectRatio = {{{HEIGHT}}} / {{{WIDTH}}};
+            } else {
+              aspectRatio = {{{WIDTH}}} / {{{HEIGHT}}};
+            }
+          } else {
+            if ({{{WIDTH}}} < {{{HEIGHT}}}) {
+              aspectRatio = {{{WIDTH}}} / {{{HEIGHT}}};
+            } else {
+              aspectRatio = {{{HEIGHT}}} / {{{WIDTH}}};
+            }
+          }
+
+          if (width * aspectRatio > window.innerHeight) {
+            width = Math.min(width, Math.ceil(height / aspectRatio));
+          }
+          height = Math.floor(width * aspectRatio);
+
+          container.style.width = width + "px";
+          container.style.height = height + "px";
+          container.style.top = (window.innerHeight - height) / 2 + "px";
+          container.style.left = (window.innerWidth - width) / 2 + "px";
+          container.style.height = height - 12 + "px";
+
+          let sizeObj = { height: height, width: width };
+
+          try {
+            unityInstance.SendMessage(
+              "Main Camera",
+              "LoadBrowserVariables",
+              JSON.stringify(sizeObj)
+            );
+          } catch {
+            console.log(
+              "Main camera not found!Maybe this isn't the tool showcase build"
+            );
+          }
+        }
+        //The event for when page refreshes or closes
+        window.addEventListener("beforeunload", function (e) {
+          OnUnload();
+          console.log("Page unloaded");
+        });
+
+        window.addEventListener("resize", Resize);
+    </script>
+  </body>
+</html>

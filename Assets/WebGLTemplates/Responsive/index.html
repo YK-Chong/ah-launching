@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta
+      name="viewport"
+      content=" height = device-height, width = device-width, initial-scale = 1.0, minimum-scale = 1.0, maximum-scale = 1.0, user-scalable = no, target-densitydpi = device-dpi "
+    />
+    <title>%UNITY_WEB_NAME%</title>
+    <link id="main-style" rel="stylesheet" href="External/style.css" />
+    <script src="%UNITY_WEBGL_LOADER_URL%"></script>
+    <script>
+      const forceLandscapeIcon = "External/landscape.svg";
+      const forcePortraitIcon = "External/portrait.svg";
+      const isChromeIos =
+        /CriOS/i.test(navigator.userAgent) &&
+        /iphone|ipod|ipad/i.test(navigator.userAgent);
+
+      let forceOrentationImg;
+      let unityInstance = UnityLoader.instantiate(
+        "unityContainer",
+        "%UNITY_WEBGL_BUILD_URL%",
+        { onProgress: UnityLoadProgress }
+      );
+
+      let portraitMode;
+      let isMobile = /Android|webOS|iphone|ipad|ipod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+      let isInFirstScreen = false;
+      let deviceOrientation = "";
+      let isForcedToRotate = false;
+
+      try {
+        portraitMode = !!JSON.parse(%UNITY_CUSTOM_PORTRAIT_MODE%);
+      } catch (e) {
+        portraitMode = false;
+      }
+
+      //To remove the mobile warning check
+
+      UnityLoader.SystemInfo.mobile = false;
+
+
+
+      //Doing first resize when page loads
+      window.onload = () => {
+        forceOrentationImg = document.getElementById("forceOrientationImg");
+
+        //Updating the values in unity on resize
+        window.addEventListener("resize", () => {
+          Resize();
+          detectDeviceOrientation();
+          var scale = "scale(1)";
+          document.body.style.webkitTransform = scale; // Chrome, Opera, Safari
+          document.body.style.msTransform = scale; // IE 9
+          document.body.style.transform = scale; // General
+        });
+        detectDeviceOrientation();
+        defaultGameMode();
+      };
+
+      function defaultGameMode() {
+        if (!isMobile && portraitMode) {
+          dynamicPageLoading(
+            "External/normal_screen_bottom.html",
+            pageSelector,
+            false
+          );
+          dynamicPageLoading(
+            "External/normal_screen_top.html",
+            pageSelector,
+            true
+          );
+          manageBottomContent();
+          isInFirstScreen = true;
+        } else {
+          dynamicPageLoading(
+            "External/semi-fullscreen.html",
+            pageSelector,
+            true
+          );
+          document
+            .getElementById("main-style")
+            .setAttribute("href", "External/semi-fullscreen_style.css");
+          clearBottomContent();
+          isInFirstScreen = false;
+          manageBottomContent();
+        }
+      }
+
+      //The event for when page refreshes or closes
+      window.addEventListener("beforeunload", function (e) {
+        OnUnload();
+      });
+
+
+
+      //Sending event info to unity onUnload
+      function OnUnload() {
+        unityInstance.SendMessage("_BrowserControls", "BrowserUnloaded");
+      }
+
+      //Sending event info to unity OnMouseLeave/Enter
+      function OnAppLoaded() {
+        document
+          .getElementById("unityContainer")
+          .addEventListener("mouseenter", () => {
+            unityInstance.SendMessage("_BrowserControls", "MouseEntered");
+          });
+
+        document
+          .getElementById("unityContainer")
+          .addEventListener("mouseleave", () => {
+            unityInstance.SendMessage("_BrowserControls", "MouseLeft");
+          });
+      }
+
+      //When unity loads in the browser send event info that page loaded
+      function UnityLoadProgress(gameInstance, progress) {
+        if (progress == 1) {
+          //gameInstance.logo.style.display = gameInstance.progress.style.display = "none";
+          console.log("WEBGL LOADED SUCCESSFULLY..");
+
+          setTimeout(() => {
+            unityInstance.SendMessage("_BrowserControls", "BrowserLoaded");
+            Resize();
+            OnAppLoaded();
+          }, 2500);
+        }
+      }
+
+      //Core Functionality for dynamic page loading
+
+      function dynamicPageLoading(url, callback, top) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            callback(this, top);
+          }
+        };
+        xhr.open("get", url, true);
+        xhr.send();
+      }
+
+      function pageSelector(response, top) {
+        let topContainer = document.getElementById("top-container");
+        let bottomContainer = document.getElementById("bottom-container");
+        setTimeout(() => {
+          Resize();
+        }, 1);
+        if (top) {
+          topContainer.innerHTML = response.responseText;
+        } else {
+          bottomContainer.innerHTML = response.responseText;
+        }
+      }
+
+      function clearTopContent() {
+        var topContainer = document.getElementById("top-container");
+        topContainer.innerHTML = "";
+      }
+
+      function clearBottomContent() {
+        var bottomContainer = document.getElementById("bottom-container");
+        bottomContainer.innerHTML = "";
+      }
+      function manageBottomContent() {
+        const bottomContainer = document.getElementById("bottom-container");
+        if (isInFirstScreen) {
+          bottomContainer.style.display = "block";
+        } else {
+          bottomContainer.style.display = "none";
+        }
+        backgroundOnMobilePortrait();
+        attachToUnityCanvas();
+      }
+    </script>
+    <!--Orientation Detection-->
+    <script>
+      function detectDeviceOrientation() {
+        if (!isChromeIos) {
+          deviceOrientation = window.orientation ? "landscape" : "portrait";
+        } else {
+          deviceOrientation =
+            window.innerHeight > window.innerWidth ? "portrait" : "landscape";
+        }
+
+        forceOrientation();
+        hideMenu();
+        backgroundOnMobilePortrait();
+      }
+
+      function backgroundOnMobilePortrait() {
+        if (!isMobile) return;
+        let bodyMobile = document.body;
+        const originalColor = bodyMobile.style.backgroundColor;
+        if (isForcedToRotate || !isInFirstScreen)
+          bodyMobile.style.backgroundColor = "rgb(35, 31, 32)";
+        else {
+          bodyMobile.style.backgroundColor = "white";
+        }
+      }
+
+      function forceOrientation() {
+        if (!isMobile) return;
+        let shouldForceOrient = shouldForceOrientation();
+        if (shouldForceOrient) {
+          if (!portraitMode) forceLandscapeOrientation();
+          else forcePortraitOrientation();
+          isForcedToRotate = true;
+          backgroundOnMobilePortrait();
+        }
+        if (!shouldForceOrient) {
+          stopForceOrientation();
+          isForcedToRotate = false;
+        }
+        manageUnityCanvas();
+      }
+
+      function forceLandscapeOrientation() {
+        clearForceOrientationClasses();
+        forceOrentationImg.classList.add("forcedLandscape");
+        forceOrentationImg.src = forceLandscapeIcon;
+      }
+
+      function forcePortraitOrientation() {
+        clearForceOrientationClasses();
+        forceOrentationImg.src = forcePortraitIcon;
+        forceOrentationImg.classList.add("forcedPortrait");
+      }
+
+      function stopForceOrientation() {
+        forceOrientationImg.classList.add("forcedOrientation-off");
+      }
+
+      function manageUnityCanvas() {
+        if (isForcedToRotate)
+          unityInstance.Module.canvas.classList.add("hideCanvas");
+        else {
+          unityInstance.Module.canvas.classList.remove("hideCanvas");
+        }
+      }
+
+      function clearForceOrientationClasses() {
+        if (forceOrientationImg.classList.contains("forcedOrientation-off")) {
+          forceOrientationImg.classList.remove("forcedOrientation-off");
+        } else if (forceOrentationImg.classList.contains("forcedLandscape"))
+          forceOrentationImg.classList.remove("forcedLandscape");
+        else if (forceOrentationImg.classList.contains("forcedPortrait"))
+          forceOrentationImg.classList.remove("forcedPortrait");
+      }
+
+      function shouldForceOrientation() {
+        if (isInFirstScreen) return false;
+        if (!portraitMode && deviceOrientation === "landscape") {
+          return false;
+        } else if (!portraitMode && deviceOrientation === "portrait") {
+          return true;
+        } else if (portraitMode && deviceOrientation === "landscape") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    </script>
+    <!--Main resizing Functionallity -->
+    <script>
+      // Main resizing function
+      function Resize() {
+        const desktopPortraitModeMaxWidth = %UNITY_WIDTH%;
+        let webglContainer = document.querySelector(".webgl");
+        let webglMaxWidthString = isInFirstScreen
+          ? getComputedStyle(webglContainer).maxWidth.split("px")
+          : getComputedStyle(webglContainer).width.split("px");
+        let maxWidth = webglMaxWidthString[0];
+        let width = maxWidth;
+        let height;
+        let aspectRatio;
+
+        if (portraitMode) {
+          aspectRatio = %UNITY_HEIGHT% > %UNITY_WIDTH% ? %UNITY_HEIGHT%/%UNITY_WIDTH% : %UNITY_WIDTH%/%UNITY_HEIGHT%;
+        } else {
+            aspectRatio =  %UNITY_WIDTH% < %UNITY_HEIGHT% ? %UNITY_WIDTH%/%UNITY_HEIGHT% : %UNITY_HEIGHT%/%UNITY_WIDTH%;
+          }
+
+
+        height = aspectRatio * width;
+
+        if (height > screen.availHeight) {
+          height = screen.availHeight;
+        }
+
+        let sizeObj = { height: height, width: width };
+
+        const unityContainer = document.getElementById("unityContainer");
+
+        if (portraitMode && !isMobile && isInFirstScreen) {
+          webglContainer.style.width = desktopPortraitModeMaxWidth + "px";
+          document.getElementById("unityContainer").style.maxWidth =
+            desktopPortraitModeMaxWidth + "px";
+          document.getElementById("unityContainer").style.margin = "0 auto";
+        } else if (portraitMode && !isMobile && !isInFirstScreen) {
+          webglContainer.style.height = %UNITY_HEIGHT% + "px"; //convert to %UNITY_HEIGHT%
+          webglContainer.style.width = desktopPortraitModeMaxWidth + "px";
+          unityContainer.style.width = desktopPortraitModeMaxWidth + "px";
+          unityContainer.style.height = webglContainer.style.height;
+          unityContainer.style.margin = "0 auto";
+        } else {
+          document.getElementById("unityContainer").style.width = width + "px";
+          document.getElementById("unityContainer").style.height =
+            height + "px";
+        }
+
+
+        if (deviceOrientation === "landscape" && isMobile) {
+          webglContainer.style.height = screen.availHeight;
+        }
+
+
+
+        try {
+          unityInstance.SendMessage(
+            "Main Camera",
+            "LoadBrowserVariables",
+            JSON.stringify(sizeObj)
+          );
+        } catch {
+          console.log("Main camera not found,maybe not a demo build");
+        }
+        hideObsoleteButtons();
+      }
+      function hideObsoleteButtons() {
+        const fullscreenButton = document.getElementById("maximize");
+        if (isMobile && fullscreenButton) {
+          fullscreenButton.style.display = "none";
+        }
+
+        const semiFullScreenButton = document.getElementById(
+          "almost_full_screen"
+        );
+        if (!isMobile && portraitMode && semiFullScreenButton) {
+          semiFullScreenButton.style.display = "none";
+        }
+      }
+
+      function hideMenu() {
+        const containerTop = document.getElementById("top-container");
+        const unityContainer = document.getElementById("webgl");
+        const unityContainerDefaultStyle = unityContainer.style;
+        const defaultTopContainerStyle = containerTop.style;
+        if (!shouldForceOrientation() || !isMobile) {
+          containerTop.style = defaultTopContainerStyle;
+          unityContainer.style = unityContainerDefaultStyle;
+          return;
+        }
+        if (!portraitMode) {
+          containerTop.style.display = "none";
+          unityContainer.style.marginTop = "55vw";
+          return;
+        } else {
+          containerTop.style.display = "none";
+          unityContainer.style.marginTop = "none";
+        }
+      }
+    </script>
+    <script>
+      (function (win) {
+        var doc = win.document;
+
+        // If there's a hash, or addEventListener is undefined, stop here
+        if (
+          !win.navigator.standalone &&
+          !location.hash &&
+          win.addEventListener
+        ) {
+          //scroll to 1
+          win.scrollTo(0, 1);
+          var scrollTop = 1,
+            getScrollTop = function () {
+              return (
+                win.pageYOffset ||
+                (doc.compatMode === "CSS1Compat" &&
+                  doc.documentElement.scrollTop) ||
+                doc.body.scrollTop ||
+                0
+              );
+            },
+            //reset to 0 on bodyready, if needed
+            bodycheck = setInterval(function () {
+              if (doc.body) {
+                clearInterval(bodycheck);
+                scrollTop = getScrollTop();
+                win.scrollTo(0, scrollTop === 1 ? 0 : 1);
+              }
+            }, 15);
+
+          win.addEventListener(
+            "load",
+            function () {
+              setTimeout(function () {
+                //at load, if user hasn't scrolled more than 20 or so...
+                if (getScrollTop() < 20) {
+                  //reset to hide addr bar at onload
+                  win.scrollTo(0, scrollTop === 1 ? 0 : 1);
+                }
+              }, 0);
+            },
+            false
+          );
+        }
+      })(this);
+    </script>
+  </head>
+
+  <body>
+    <!--Nav bar-->
+    <div id="top-container"></div>
+    <div class="main-content">
+      <div class="main-content--grid">
+        <!-- Webgl content -->
+        <div id="webgl" class="webgl">
+          <div class="webgl-content" id="webgl-content">
+            <div id="unityContainer" style="width: 960px; height: 600px"></div>
+          </div>
+          <div
+            id="forceOrientationBackground"
+            class="forceOrientationBackground"
+          >
+            <img id="forceOrientationImg" class="" />
+          </div>
+        </div>
+        <!--Band below Webgl content-->
+        <div id="bottom-container"></div>
+      </div>
+    </div>
+
+    <script>
+      function toggleHamburger(obj) {
+        const containerElement = obj.parentElement.parentElement;
+        containerElement.classList.toggle("change");
+      }
+    </script>
+  </body>
+</html>

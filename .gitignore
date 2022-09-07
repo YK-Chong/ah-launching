@@ -1,0 +1,13 @@
+/Temp
+/Logs
+/Library
+/UserSettings
+/obj
+/Build
+/.vs
+/.vsconfig
+/*.csproj
+/*.csproj.user
+/*.Editor.csproj
+/*.Editor.Plugins.csproj
+/*.Plugins.csproj
