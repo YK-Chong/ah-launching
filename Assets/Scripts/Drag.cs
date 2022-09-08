@@ -58,7 +58,7 @@ public class Drag : MonoBehaviour
             }
 
             pivot.transform.position = Vector3.Lerp(pivot.transform.position, initialPivot + target, Time.deltaTime * ratio);
-            if (pivot.transform.position.y < -50 || _timer >= _endScrollTime)
+            if (pivot.transform.position.y < -135|| _timer >= _endScrollTime)
                 Manager.Instance.ChangeState(Manager.State.ScrollEnd);
         }
     }

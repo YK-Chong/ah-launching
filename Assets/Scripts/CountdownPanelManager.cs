@@ -30,6 +30,7 @@ public class CountdownPanelManager : PanelManager<CountdownPanelManager>
             _timer += Time.deltaTime;
             int countdown = (int)_countdownTimer - (int)_timer;
             txt_Countdown.text = countdown.ToString();
+            txt_Countdown.gameObject.SetActive(countdown > 0);
             if (_timer >= _countdownTimer)
             {
                 Manager.Instance.ChangeState(Manager.State.Start);

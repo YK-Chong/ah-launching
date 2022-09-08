@@ -17,6 +17,7 @@ public abstract class PanelManager<T> : MonoBehaviour where T : PanelManager<T>
     protected Action OnHide { get; set; }
 
     private CanvasGroup _canvasGroup;
+    public CanvasGroup CanvasGroup { get => _canvasGroup; }
 
     protected virtual void Start()
     {
@@ -27,7 +28,12 @@ public abstract class PanelManager<T> : MonoBehaviour where T : PanelManager<T>
 
     protected virtual void Update()
     {
-        _canvasGroup.alpha = Mathf.Lerp(_canvasGroup.alpha,  (IsDisplay ? 1 : 0), Time.deltaTime * 10);
+        _canvasGroup.alpha = Mathf.Lerp(_canvasGroup.alpha,  (IsDisplay ? 1 : 0), Time.deltaTime * 2);
+    }
+
+    public void SetCanvasGroupAlpha(float alpha)
+    {
+        _canvasGroup.alpha = alpha;
     }
 
     private void OnStateChanged(Manager.State state)
