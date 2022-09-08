@@ -17,10 +17,5 @@ public class DisplayLogoPanelManager : PanelManager<DisplayLogoPanelManager>
     {
         base.Start();
     }
-
-    private void Reset()
-    {
-
-    }
 }
 

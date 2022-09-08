@@ -17,10 +17,5 @@ public class ScrollEndPanelManager : PanelManager<ScrollEndPanelManager>
     {
         base.Start();
     }
-
-    private void Reset()
-    {
-
-    }
 }
 

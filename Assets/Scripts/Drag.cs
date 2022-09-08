@@ -15,7 +15,7 @@ public class Drag : MonoBehaviour
     public ParticleSystem particle;
     private Vector3 target;
     private float _timer;
-    private float _endScrollTime = 15f;
+    private float _endScrollTime = 20f;
     public Color particleColor;
     private Color _hideParticleColor;
     private Material _particleMaterial;

@@ -8,7 +8,7 @@ public class WaitingPanelManager : PanelManager<WaitingPanelManager>
 {
     protected override Manager.State DisplayState { get; } = Manager.State.Waiting;
 
-    public TextMeshProUGUI text;
+    public Text text;
 
     private void Awake()
     {
@@ -18,7 +18,7 @@ public class WaitingPanelManager : PanelManager<WaitingPanelManager>
     protected override void Start()
     {
         base.Start();
-        OnDisplay += () => text.text = "Waiting others to join";
+        Manager.Instance.OnSignalReceivedCallback += (state) => text.text = "Waiting others to join";
         OnHide += Reset;
     }
 

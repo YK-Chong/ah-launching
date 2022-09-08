@@ -6,7 +6,6 @@ mergeInto(LibraryManager.library, {
         connect("User", onMessageReceived);
 
         function onMessageReceived(msg) {
-            console.log(msg);
             if (msg.includes("CurrentState:") && callback !== 0) {
                 let state = parseInt(msg.split(":")[1]);
                 Module.dynCall_vi(callback, state);
@@ -19,15 +18,15 @@ mergeInto(LibraryManager.library, {
                 tryConnectToWS(userType);
                 onReceiveMessageCallback = onReceiveMessage;
                 setInterval(() => tryConnectToWS(userType), 1000);
+                setInterval(() => ws.send("Ping"), 60000);
             }
         }
 
         function tryConnectToWS(userType) {
             if (ws == undefined || ws.readyState === ws.CLOSED) {
-                console.log("Try connect: " + new Date());
                 ws = new WebSocket("wss://quixotic-grey-ceiling.glitch.me/");
                 ws.addEventListener("open", () => {
-                    console.log("We are connected");
+                    console.log("We are connected at " + new Date());
                     ws.send("Connect:" + userType);
                 });
 
@@ -39,8 +38,7 @@ mergeInto(LibraryManager.library, {
                     console.log(event.data);
                 });
             } else if (ws.readyState === ws.OPEN) {
-                console.log("Ping WS");
-                //ws.send('Ping');
+
             }
         }
     }

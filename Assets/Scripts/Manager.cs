@@ -11,6 +11,7 @@ public class Manager : MonoBehaviour
     [SerializeField]
     public State CurrentState { get; private set; }
     public GameObject cloth;
+    public Action<int> OnSignalReceivedCallback { get; set; }
 
     private void Awake()
     {
@@ -20,13 +21,10 @@ public class Manager : MonoBehaviour
     IEnumerator Start()
     {
         WebsocketManager.Connect(OnSignalReceived);
-        for (int i = 0; i < 98; i++)
-        {
-            Application.OpenURL("https://192.168.1.26:8080/");
-        }
         yield return new WaitForEndOfFrame();
         //yield return new WaitUntil(() => MyGifPlayer.Instance.IsReady);
         ChangeState(State.Waiting);
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
     void Update()
@@ -48,6 +46,7 @@ public class Manager : MonoBehaviour
     void OnSignalReceived(int state)
     {
         ChangeState((State)state);
+        OnSignalReceivedCallback?.Invoke(state);
     }
 
     public void ChangeState(State state)

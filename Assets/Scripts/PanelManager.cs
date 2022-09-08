@@ -25,11 +25,16 @@ public abstract class PanelManager<T> : MonoBehaviour where T : PanelManager<T>
         _canvasGroup = GetComponent<CanvasGroup>();
     }
 
+    protected virtual void Update()
+    {
+        _canvasGroup.alpha = Mathf.Lerp(_canvasGroup.alpha,  (IsDisplay ? 1 : 0), Time.deltaTime * 10);
+    }
+
     private void OnStateChanged(Manager.State state)
     {
         //_child.gameObject.SetActive(IsDisplay = state == DisplayState);
         IsDisplay = state == DisplayState;
-        _canvasGroup.alpha = (IsDisplay ? 1 : 0);
+        
         if (IsDisplay)
             OnDisplay?.Invoke();
         else

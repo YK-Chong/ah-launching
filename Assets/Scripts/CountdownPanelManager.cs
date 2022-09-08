@@ -9,8 +9,7 @@ public class CountdownPanelManager : PanelManager<CountdownPanelManager>
     protected override Manager.State DisplayState { get; } = Manager.State.Countdown;
     private float _timer;
     private float _countdownTimer = 3f;
-    public TextMeshProUGUI
-        txt_Countdown;
+    public Text txt_Countdown;
 
     private void Awake()
     {
@@ -23,8 +22,9 @@ public class CountdownPanelManager : PanelManager<CountdownPanelManager>
         base.Start();
     }
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
         if(IsDisplay)
         {
             _timer += Time.deltaTime;
