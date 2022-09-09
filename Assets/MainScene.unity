@@ -15707,7 +15707,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 380112337}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 5.9860516}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -67709,7 +67709,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   img: {fileID: 380112339}
-  gifPath: https://affinhwang.thebluelobby.com/animation1.gif
+  gifPath: https://affinhwang.thebluelobby.com/animation3.gif
   rt: {fileID: 8400000, guid: 15c0216153333d544a110c11f4e98510, type: 2}
 --- !u!225 &1610702503
 CanvasGroup:
