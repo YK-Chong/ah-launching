@@ -29,26 +29,28 @@ public class Manager : MonoBehaviour
 
     void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.Alpha0))
-        //{
-        //    ChangeState((State)0);
-        //}
-        //else if (Input.GetKeyDown(KeyCode.Alpha1))
-        //{
-        //    ChangeState((State)1);
-        //}
-        //else if (Input.GetKeyDown(KeyCode.Alpha2))
-        //{
-        //    ChangeState((State)2);
-        //}
-        //else if (Input.GetKeyDown(KeyCode.Alpha3))
-        //{
-        //    ChangeState((State)3);
-        //}
-        //else if (Input.GetKeyDown(KeyCode.Alpha4))
-        //{
-        //    ChangeState((State)4);
-        //}
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            ChangeState((State)0);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ChangeState((State)1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ChangeState((State)2);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            ChangeState((State)3);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            ChangeState((State)4);
+        }
+#endif
     }
 
     void OnSignalReceived(int state)

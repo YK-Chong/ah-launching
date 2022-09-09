@@ -28,7 +28,7 @@ public abstract class PanelManager<T> : MonoBehaviour where T : PanelManager<T>
 
     protected virtual void Update()
     {
-        _canvasGroup.alpha = Mathf.Lerp(_canvasGroup.alpha,  (IsDisplay ? 1 : 0), Time.deltaTime * 2);
+        _canvasGroup.alpha = Mathf.Lerp(_canvasGroup.alpha,  (IsDisplay ? 1 : 0), Time.deltaTime * 4);
     }
 
     public void SetCanvasGroupAlpha(float alpha)

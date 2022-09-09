@@ -34,7 +34,7 @@ public class Drag : MonoBehaviour
         if(Manager.Instance.CurrentState == Manager.State.Start)
         {
             _timer += Time.deltaTime;
-            particle.gameObject.SetActive(true);
+            
             if (Input.GetMouseButton(0))
             {
                 if (onPress == false)
@@ -48,17 +48,24 @@ public class Drag : MonoBehaviour
                 var diff = initial.y - t.y;
 
                 target = new Vector3(0, diff > 0 ? 0 : diff, 0);
-
-                SetParticleColor(Color.Lerp(GetParticleColor(), particleColor, Time.deltaTime * 10f));
             }
             else
             {
                 onPress = false;
-                SetParticleColor(Color.Lerp(GetParticleColor(), _hideParticleColor, Time.deltaTime * 1f));
             }
 
             pivot.transform.position = Vector3.Lerp(pivot.transform.position, initialPivot + target, Time.deltaTime * ratio);
-            if (pivot.transform.position.y < -135|| _timer >= _endScrollTime)
+
+            var maxY = -135;
+            var pivotY = pivot.transform.position.y;
+            if (pivotY <= -15)
+            {
+                particle.gameObject.SetActive(true);
+                var ratio = pivotY / maxY;
+                SetParticleColor(Color.Lerp(_hideParticleColor, particleColor, ratio));
+            }
+            
+            if (pivotY < maxY || _timer >= _endScrollTime)
                 Manager.Instance.ChangeState(Manager.State.ScrollEnd);
         }
     }
