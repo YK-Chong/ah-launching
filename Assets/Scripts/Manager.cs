@@ -23,7 +23,7 @@ public class Manager : MonoBehaviour
         WebsocketManager.Connect(OnSignalReceived);
         yield return new WaitForEndOfFrame();
         //yield return new WaitUntil(() => MyGifPlayer.Instance.IsReady);
-        ChangeState(State.Waiting);
+        ChangeState(State.Loading);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
@@ -72,6 +72,7 @@ public class Manager : MonoBehaviour
         Countdown = 1,
         End = 2,
         ScrollEnd = 3,
-        Start = 4
+        Start = 4,
+        Loading = 5
     }
 }

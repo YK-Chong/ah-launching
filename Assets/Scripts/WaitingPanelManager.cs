@@ -18,7 +18,7 @@ public class WaitingPanelManager : PanelManager<WaitingPanelManager>
     protected override void Start()
     {
         base.Start();
-        Manager.Instance.OnSignalReceivedCallback += (state) => text.text = "Waiting others to join";
+        //Manager.Instance.OnSignalReceivedCallback += (state) => text.text = "Waiting others to join";
         OnHide += OnHideCallback;
         OnDisplay += () => text.gameObject.SetActive(true);
     }
@@ -30,7 +30,7 @@ public class WaitingPanelManager : PanelManager<WaitingPanelManager>
 
     private void OnHideCallback()
     {
-        text.text = "Loading";
+        //text.text = "Loading";
         text.gameObject.SetActive(false);
     }
 }

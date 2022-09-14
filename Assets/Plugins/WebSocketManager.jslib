@@ -41,5 +41,21 @@ mergeInto(LibraryManager.library, {
 
             }
         }
+    },
+    WebGL_SendWebSocketMessage: function (msg) {
+        let ws;
+        tryConnectToWS();
+        function tryConnectToWS(userType) {
+            if (ws == undefined || ws.readyState === ws.CLOSED) {
+                ws = new WebSocket("wss://quixotic-grey-ceiling.glitch.me/");
+                ws.addEventListener("open", () => {
+                    console.log("Test");
+                    ws.send(msg);
+                });
+                
+            } else if (ws.readyState === ws.OPEN) {
+
+            }
+        }
     }
 });

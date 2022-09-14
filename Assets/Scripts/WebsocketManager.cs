@@ -10,6 +10,9 @@ public class WebsocketManager
     [DllImport("__Internal", EntryPoint = "WebGL_ConnectWebSocket")]
     private static extern void WebGL_ConnectWebSocket(Action<int> callback);
 
+	[DllImport("__Internal", EntryPoint = "WebGL_SendWebSocketMessage")]
+	private static extern void WebGL_SendWebSocketMessage(string msg);
+
 	private static event Action<int> CallbackEvent;
 
 	[MonoPInvokeCallback(typeof(Action<int>))]
@@ -29,5 +32,12 @@ public class WebsocketManager
 			WebGL_ConnectWebSocket(null);
 			}
 		#endif
+	}
+
+	public static void SendMessage(string msg)
+	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		WebGL_SendWebSocketMessage(msg);
+#endif
 	}
 }

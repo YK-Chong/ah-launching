@@ -20,6 +20,7 @@ public class CountdownPanelManager : PanelManager<CountdownPanelManager>
     protected override void Start()
     {
         base.Start();
+        _countdownTimer += 1;
     }
 
     protected override void Update()
@@ -30,7 +31,7 @@ public class CountdownPanelManager : PanelManager<CountdownPanelManager>
             _timer += Time.deltaTime;
             int countdown = (int)_countdownTimer - (int)_timer;
             txt_Countdown.text = countdown.ToString();
-            txt_Countdown.gameObject.SetActive(countdown > 0);
+            txt_Countdown.gameObject.SetActive(countdown > 0 && countdown < 4);
             if (_timer >= _countdownTimer)
             {
                 Manager.Instance.ChangeState(Manager.State.Start);
