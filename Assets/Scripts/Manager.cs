@@ -9,9 +9,26 @@ public class Manager : MonoBehaviour
     public static Manager Instance { get; private set; }
     public Action<State> OnStateChanged { get; set; }
     [SerializeField]
-    public State CurrentState { get; private set; }
+    private State _currentState;
+    public State CurrentState
+    {
+        set
+        {
+            if(_currentState != value)
+            {
+                _currentState = value;
+                OnStateChanged?.Invoke(_currentState);
+            }
+        }
+        get
+        {
+            return _currentState;
+        }
+    }
     public GameObject cloth;
+    public MeshRenderer meshRenderer;
     public Action<int> OnSignalReceivedCallback { get; set; }
+    public bool ScrollEnded { get; private set; } = false;
 
     private void Awake()
     {
@@ -34,21 +51,25 @@ public class Manager : MonoBehaviour
         {
             ChangeState((State)0);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha1))
+        else if (Input.GetKey(KeyCode.Alpha1))
         {
             ChangeState((State)1);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        else if (Input.GetKey(KeyCode.Alpha2))
         {
             ChangeState((State)2);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        else if (Input.GetKey(KeyCode.Alpha3))
         {
             ChangeState((State)3);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             ChangeState((State)4);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            ChangeState((State)5);
         }
 #endif
     }
@@ -61,9 +82,26 @@ public class Manager : MonoBehaviour
 
     public void ChangeState(State state)
     {
-        CurrentState = state;
-        OnStateChanged?.Invoke(CurrentState);
-        cloth.SetActive(state == State.Start);
+        if (state != State.Countdown && state != State.Start && state != State.ScrollEnd)
+            ScrollEnded = false;
+
+        if (state == State.Countdown)
+        {
+            if (ScrollEnded)
+                CurrentState = State.ScrollEnd;
+            else
+                CurrentState = State.Start;
+        }
+        else
+            CurrentState = state;
+        
+        //cloth.SetActive(CurrentState == State.Start);
+        meshRenderer.enabled = (CurrentState == State.Start);
+    }
+
+    public void EndScroll()
+    {
+        ScrollEnded = true;
     }
 
     public enum State

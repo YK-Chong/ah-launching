@@ -18,7 +18,11 @@ mergeInto(LibraryManager.library, {
                 tryConnectToWS(userType);
                 onReceiveMessageCallback = onReceiveMessage;
                 setInterval(() => tryConnectToWS(userType), 1000);
-                setInterval(() => ws.send("Ping"), 60000);
+                setInterval(() => {
+                    if (ws != undefined && ws.readyState === ws.OPEN) {
+                        ws.send("GetState");
+                    }
+                }, 500);
             }
         }
 
@@ -52,7 +56,7 @@ mergeInto(LibraryManager.library, {
                     console.log("Test");
                     ws.send(msg);
                 });
-                
+
             } else if (ws.readyState === ws.OPEN) {
 
             }

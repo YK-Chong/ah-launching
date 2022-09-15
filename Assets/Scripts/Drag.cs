@@ -22,7 +22,7 @@ public class Drag : MonoBehaviour
 
     void Start()
     {
-        Manager.Instance.OnStateChanged += OnStateChanged;
+        //Manager.Instance.OnStateChanged += OnStateChanged;
         resetPivot = initialPivot = pivot.transform.position;
         _particleMaterial = particle.GetComponent<ParticleSystemRenderer>().material;
         _hideParticleColor = new Color(particleColor.r, particleColor.g, particleColor.b, 0);
@@ -56,7 +56,7 @@ public class Drag : MonoBehaviour
 
             pivot.transform.position = Vector3.Lerp(pivot.transform.position, initialPivot + target, Time.deltaTime * ratio);
 
-            var maxY = -135;
+            var maxY = -155;
             var pivotY = pivot.transform.position.y;
             if (pivotY <= -15)
             {
@@ -64,9 +64,19 @@ public class Drag : MonoBehaviour
                 var ratio = pivotY / maxY;
                 SetParticleColor(Color.Lerp(_hideParticleColor, particleColor, ratio));
             }
-            
-            if (pivotY < maxY || _timer >= _endScrollTime)
+
+            //if (pivotY < maxY || _timer >= _endScrollTime)
+            if (pivotY < maxY)
+            {
+                Manager.Instance.EndScroll();
                 Manager.Instance.ChangeState(Manager.State.ScrollEnd);
+            }
+                //Manager.Instance.ChangeState(Manager.State.ScrollEnd);
+                
+        }
+        else
+        {
+            Reset();
         }
     }
 
@@ -82,7 +92,8 @@ public class Drag : MonoBehaviour
 
     private void OnStateChanged(Manager.State state)
     {
-        Reset();
+        if(state != Manager.State.Start)
+            Reset();
     }
 
     public void Reset()
